@@ -161,8 +161,51 @@ module.exports = class PetController {
             res.status(200).json({ message: 'Pet removido com sucesso!', data: pet })
         }
         static async updatePet(req, res) {
-            res.status(200).json({ message: 'em construção' })
-            return
+            const { name, age, weight, color } = req.body
+            const id = req.params.id
+            const images = req.files
+            const updateData = {}
+
+            if (!mongoose.Types.ObjectId.isValid(id)) {
+                res.status(422).json({ message: 'O id do pet é obrigatório!' })
+                return
+            }
+
+            const pet = await Pet.findById(id)
+
+            if (!pet) {
+                if (!pet) {
+                    res.status(404).json({ message: 'Pet não encontrado!' })
+                    return
+                }
+
+                const token = getToken(req)
+                const user = await getUserByToken(token)
+
+                if (pet.user._id.toString() !== user._id.toString()) {
+                    res.status(403).json({ message: 'apenas o dono pode atualizar o pet!' })
+                    return
+                }
+
+                if (name) {
+                    updateData.name = name
+                }
+                if (age) {
+                    updateData.age = age
+                }
+                if (weight) {
+                    updateData.weight = weight
+                }
+                if (color) {
+                    updateData.color = color
+                }
+                if (images && images.length > 0) {
+                    updateData.images = images.map((file) => file.filename)
+                }
+
+                await Pet.findByIdAndUpdate(id, updateData)
+                res.status(200).json({ message: 'Pet atualizado com sucesso!', data: updateData })
+            }
         }
         static async schedule(req, res) {
             res.status(200).json({ message: 'em construção' })
