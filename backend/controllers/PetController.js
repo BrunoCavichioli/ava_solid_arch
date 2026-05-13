@@ -9,7 +9,7 @@ const getUserByToken = require('../helpers/get-user-by-token')
 const { countDocuments } = require('../models/Pet')
 
 module.exports = class PetController {
-    static async create(req, res) {
+static async create(req, res) {
         const { name, age, weight, color } = req.body
 
         if (!name) {
